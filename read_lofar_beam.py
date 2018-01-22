@@ -8,6 +8,9 @@
 #       end_minute
 #       -- only specify if small portions of data need to be plotted
 #           after initial run
+#
+# created by Diana Morosan: morosand@tcd.ie
+# Please acknowledge the use of this code
 
 
 from pylab import figure,imshow,xlabel,ylabel,title,close,colorbar
@@ -24,7 +27,7 @@ import sys
 # extracting time and frequency information from h5 file
 file = str(sys.argv[1])
 f = h5py.File( file, 'r' )
-data = f[ 'SUB_ARRAY_POINTING_000/BEAM_'+str(f.attrs.values()[6])[16:19]+'/STOKES_'+str(f.attrs.values()[6])[21:22] ][:,:]
+data = f[ 'SUB_ARRAY_POINTING_000/BEAM_'+str(list(f.attrs.values())[6])[16:19]+'/STOKES_'+str(list(f.attrs.values())[6])[21:22] ][:,:]
 
 t_lines = data.shape[0]
 f_lines = data.shape[1]
@@ -42,15 +45,15 @@ else:
 start_time_line = int( (start_min/(total_time/60.))*t_lines )
 end_time_line = int( (end_min/(total_time/60.))*t_lines )
 
-start_freq = f.attrs.values()[30] #in MHz
-end_freq = f.attrs.values()[8] 
+start_freq = list(f.attrs.values())[30] #in MHz
+end_freq = list(f.attrs.values())[8] 
 
 t_resolution = (total_time/t_lines)*1000. #in milliseconds
 f_resolution = (end_freq - start_freq)/f_lines #in MHz
 
 
 # extracting time information
-time = f.attrs.values()[12]
+time = list(f.attrs.values())[12]
 year = int(str(time)[0:4])
 month = int(str(time)[5:7])
 day = int(str(time)[8:10])
@@ -64,7 +67,8 @@ end_time = t + datetime.timedelta( minutes = end_min )
 print( 'Start time of observation UT:', str(start_time.date()) + ' ' + str(start_time.time()) )
 
 #plotting dynamic spectrum for specified times
-data = f['SUB_ARRAY_POINTING_000/BEAM_'+str(f.attrs.values()[6])[16:19]+'/STOKES_'+str(f.attrs.values()[6])[21:22]][start_time_line:end_time_line,:]
+data = f['SUB_ARRAY_POINTING_000/BEAM_'+str(f.attrs.values()[6])[16:19]+
+         '/STOKES_'+str(f.attrs.values()[6])[21:22]][start_time_line:end_time_line,:]
 
 #normalizing frequency channel responses
 for sb in xrange(data.shape[1]):
