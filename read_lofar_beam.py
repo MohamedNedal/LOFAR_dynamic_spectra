@@ -30,7 +30,7 @@ t_lines = data.shape[0]
 f_lines = data.shape[1]
 
 total_time = f.attrs.values()[22] #in seconds
-print 'Total integration time in seconds:', total_time
+print( 'Total integration time in seconds:', total_time )
 
 if len(sys.argv)>2:
     start_min = int(sys.argv[2])
@@ -61,7 +61,7 @@ second = int(str(time)[17:19])
 t = datetime.datetime(year, month, day, hour, minute, second)
 start_time = t + datetime.timedelta( minutes = start_min )
 end_time = t + datetime.timedelta( minutes = end_min )
-print 'Start time of observation UT:', str(start_time.date()) + ' ' + str(start_time.time())
+print( 'Start time of observation UT:', str(start_time.date()) + ' ' + str(start_time.time()) )
 
 #plotting dynamic spectrum for specified times
 data = f['SUB_ARRAY_POINTING_000/BEAM_'+str(f.attrs.values()[6])[16:19]+'/STOKES_'+str(f.attrs.values()[6])[21:22]][start_time_line:end_time_line,:]
