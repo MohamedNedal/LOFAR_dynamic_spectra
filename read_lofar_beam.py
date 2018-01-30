@@ -3,6 +3,8 @@
 #       $ python read_lofar_beam.py filename start-minute end-minute
 # Inputs:
 #       filename - any LOFAR dynamic spectrum HDF5 file
+#       --> make sure code is in the same fold as both .h5
+#          and .raw data files
 # Optional:
 #       start-minute
 #       end_minute
@@ -11,6 +13,9 @@
 #
 # created by Diana Morosan: morosand@tcd.ie
 # Please acknowledge the use of this code
+#
+# Compatible with Python 3.6
+
 
 
 from pylab import figure,imshow,xlabel,ylabel,title,close,colorbar
@@ -27,12 +32,12 @@ import sys
 # extracting time and frequency information from h5 file
 file = str(sys.argv[1])
 f = h5py.File( file, 'r' )
-data = f[ 'SUB_ARRAY_POINTING_000/BEAM_'+str(list(f.attrs.values())[6])[16:19]+'/STOKES_'+str(list(f.attrs.values())[6])[21:22] ][:,:]
+data = f[ 'SUB_ARRAY_POINTING_000/BEAM_'+str(list(f.attrs.values())[6])[17:20]+'/STOKES_'+str(list(f.attrs.values())[6])[22:23] ][:,:]
 
 t_lines = data.shape[0]
 f_lines = data.shape[1]
 
-total_time = f.attrs.values()[22] #in seconds
+total_time = list(f.attrs.values())[22] #in seconds
 print( 'Total integration time in seconds:', total_time )
 
 if len(sys.argv)>2:
@@ -53,7 +58,7 @@ f_resolution = (end_freq - start_freq)/f_lines #in MHz
 
 
 # extracting time information
-time = list(f.attrs.values())[12]
+time = list(f.attrs.values())[12].decode("utf-8")
 year = int(str(time)[0:4])
 month = int(str(time)[5:7])
 day = int(str(time)[8:10])
@@ -67,18 +72,17 @@ end_time = t + datetime.timedelta( minutes = end_min )
 print( 'Start time of observation UT:', str(start_time.date()) + ' ' + str(start_time.time()) )
 
 #plotting dynamic spectrum for specified times
-data = f['SUB_ARRAY_POINTING_000/BEAM_'+str(f.attrs.values()[6])[16:19]+
-         '/STOKES_'+str(f.attrs.values()[6])[21:22]][start_time_line:end_time_line,:]
+data = f[ 'SUB_ARRAY_POINTING_000/BEAM_'+str(list(f.attrs.values())[6])[17:20]+'/STOKES_'+str(list(f.attrs.values())[6])[22:23] ][start_time_line:end_time_line,:]
 
 #normalizing frequency channel responses
-for sb in xrange(data.shape[1]):
+for sb in range(data.shape[1]):
     data[:,sb] = data[:,sb]/np.median(data[:,sb])
 data = np.transpose(data)
 
 #plot
-plt.figure(1,figsize=(18,9))
+plt.figure(1,figsize=(16,7))
 imshow(data,vmin=1.00,vmax=1.4,aspect='auto',
-       extent=(start_time,end_time,end_freq,start_freq))
+       extent=(dates.date2num(start_time),dates.date2num(end_time),end_freq,start_freq))
 xlabel('Start Time: ' + str( start_time.date() ) + ' ' + str(start_time.time()), fontsize = 16)
 ylabel('Frequency (MHz)', fontsize = 16)
 title('LOFAR Dynamic Spectrum', fontsize = 16)
