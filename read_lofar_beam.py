@@ -32,7 +32,10 @@ import sys
 # extracting time and frequency information from h5 file
 file = str(sys.argv[1])
 f = h5py.File( file, 'r' )
-data = f[ 'SUB_ARRAY_POINTING_000/BEAM_'+str(list(f.attrs.values())[6])[17:20]+'/STOKES_'+str(list(f.attrs.values())[6])[22:23] ][:,:]
+beam = str(list(f.attrs.values())[6].decode("utf-8"))[16:19]
+stokes = str(list(f.attrs.values())[6].decode("utf-8"))[21:22]
+
+data = f[ 'SUB_ARRAY_POINTING_000/BEAM_'+beam+'/STOKES_'+stokes ][:,:]
 
 t_lines = data.shape[0]
 f_lines = data.shape[1]
@@ -72,7 +75,7 @@ end_time = t + datetime.timedelta( minutes = end_min )
 print( 'Start time of observation UT:', str(start_time.date()) + ' ' + str(start_time.time()) )
 
 #plotting dynamic spectrum for specified times
-data = f[ 'SUB_ARRAY_POINTING_000/BEAM_'+str(list(f.attrs.values())[6])[17:20]+'/STOKES_'+str(list(f.attrs.values())[6])[22:23] ][start_time_line:end_time_line,:]
+data = f[ 'SUB_ARRAY_POINTING_000/BEAM_'+beam+'/STOKES_'+stokes ][start_time_line:end_time_line,:]
 
 #normalizing frequency channel responses
 for sb in range(data.shape[1]):
@@ -81,7 +84,7 @@ data = np.transpose(data)
 
 #plot
 plt.figure(1,figsize=(16,7))
-imshow(data,vmin=1.00,vmax=1.4,aspect='auto',
+imshow(data,vmin=0.90,vmax=2.00,aspect='auto',
        extent=(dates.date2num(start_time),dates.date2num(end_time),end_freq,start_freq))
 xlabel('Start Time: ' + str( start_time.date() ) + ' ' + str(start_time.time()), fontsize = 16)
 ylabel('Frequency (MHz)', fontsize = 16)
