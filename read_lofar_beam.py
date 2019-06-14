@@ -40,7 +40,7 @@ data = f[ 'SUB_ARRAY_POINTING_'+sap+'/BEAM_'+beam+'/STOKES_'+stokes ]
 t_lines = data.shape[0]
 f_lines = data.shape[1]
 
-total_time = list(f.attrs.values())[22] #in seconds
+total_time = f.attrs['TOTAL_INTEGRATION_TIME'] #in seconds
 print( 'Total integration time in seconds:', total_time )
 
 if len(sys.argv)>2:
