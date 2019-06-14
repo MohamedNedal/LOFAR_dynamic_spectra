@@ -3,13 +3,12 @@
 #       $ python read_lofar_beam.py filename start-minute end-minute
 # Inputs:
 #       filename - any LOFAR dynamic spectrum HDF5 file
-#       --> make sure code is in the same fold as both .h5
+#       --> make sure code is in the same folder as both .h5
 #          and .raw data files
 # Optional:
 #       start-minute
 #       end_minute
 #       -- only specify if small portions of data need to be plotted
-#           after initial run
 #
 # created by Diana Morosan: morosand@tcd.ie
 # Please acknowledge the use of this code
@@ -32,10 +31,11 @@ import sys
 # extracting time and frequency information from h5 file
 file = str(sys.argv[1])
 f = h5py.File( file, 'r' )
-beam = str(list(f.attrs.values())[6].decode("utf-8"))[16:19]
-stokes = str(list(f.attrs.values())[6].decode("utf-8"))[21:22]
+beam = f.attrs['FILENAME'].decode("utf-8")[16:19]
+stokes = f.attrs['FILENAME'].decode("utf-8")[21:22]
+sap = f.attrs['FILENAME'].decode("utf-8")[11:14]
 
-data = f[ 'SUB_ARRAY_POINTING_000/BEAM_'+beam+'/STOKES_'+stokes ][:,:]
+data = f[ 'SUB_ARRAY_POINTING_'+sap+'/BEAM_'+beam+'/STOKES_'+stokes ]
 
 t_lines = data.shape[0]
 f_lines = data.shape[1]
@@ -61,30 +61,29 @@ f_resolution = (end_freq - start_freq)/f_lines #in MHz
 
 
 # extracting time information
-time = list(f.attrs.values())[12].decode("utf-8")
-year = int(str(time)[0:4])
-month = int(str(time)[5:7])
-day = int(str(time)[8:10])
-hour = int(str(time)[11:13])
-minute = int(str(time)[14:16])
-second = int(str(time)[17:19])
+#
+time = f.attrs['OBSERVATION_START_UTC'].decode("utf-8")
+t = datetime.datetime.strptime( time, '%Y-%m-%dT%H:%M:%S.%f000Z' )
+print( 'Start time of observation UT:', str(t.date()) + ' ' + str(t.time()) )
 
-t = datetime.datetime(year, month, day, hour, minute, second)
 start_time = t + datetime.timedelta( minutes = start_min )
 end_time = t + datetime.timedelta( minutes = end_min )
-print( 'Start time of observation UT:', str(start_time.date()) + ' ' + str(start_time.time()) )
+print( 'Start time of dynamic spectrum UT:', str(start_time.date()) + ' ' + str(start_time.time()) )
 
-#plotting dynamic spectrum for specified times
-data = f[ 'SUB_ARRAY_POINTING_000/BEAM_'+beam+'/STOKES_'+stokes ][start_time_line:end_time_line,:]
+# extracting data for specified times
+#
+data = f[ 'SUB_ARRAY_POINTING_'+sap+'/BEAM_'+beam+'/STOKES_'+stokes ][start_time_line:end_time_line,:]
 
-#normalizing frequency channel responses
+# normalizing frequency channel responses
+#
 for sb in range(data.shape[1]):
     data[:,sb] = data[:,sb]/np.median(data[:,sb])
 data = np.transpose(data)
 
-#plot
+# plot dynamic spectrum
+#
 plt.figure(1,figsize=(16,7))
-imshow(data,vmin=0.90,vmax=2.00,aspect='auto',
+imshow(data,vmin=0.90,vmax=1.80,aspect='auto',
        extent=(dates.date2num(start_time),dates.date2num(end_time),end_freq,start_freq))
 xlabel('Start Time: ' + str( start_time.date() ) + ' ' + str(start_time.time()), fontsize = 16)
 ylabel('Frequency (MHz)', fontsize = 16)
@@ -96,5 +95,4 @@ ax.xaxis.set_major_formatter(dates.DateFormatter('%H:%M:%S'))
 ax.xaxis.set_major_locator( MaxNLocator(nbins = 6) )
 plt.savefig('LOFAR_dynamic_spectrum.png')
 plt.show()
-close()
 
