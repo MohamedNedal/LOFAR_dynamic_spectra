@@ -53,8 +53,8 @@ else:
 start_time_line = int( (start_min/(total_time/60.))*t_lines )
 end_time_line = int( (end_min/(total_time/60.))*t_lines )
 
-start_freq = list(f.attrs.values())[30] #in MHz
-end_freq = list(f.attrs.values())[8] 
+start_freq = f.attrs['OBSERVATION_FREQUENCY_MIN'] #in MHz
+end_freq = f.attrs['OBSERVATION_FREQUENCY_MAX']
 
 t_resolution = (total_time/t_lines)*1000. #in milliseconds
 f_resolution = (end_freq - start_freq)/f_lines #in MHz
