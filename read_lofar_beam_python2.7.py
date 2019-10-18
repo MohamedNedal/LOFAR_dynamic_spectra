@@ -59,18 +59,12 @@ t_resolution = (total_time/t_lines)*1000. #in milliseconds
 f_resolution = (end_freq - start_freq)/f_lines #in MHz
 
 
-# extracting time information
-time = f.attrs.values()[12]
-year = int(str(time)[0:4])
-month = int(str(time)[5:7])
-day = int(str(time)[8:10])
-hour = int(str(time)[11:13])
-minute = int(str(time)[14:16])
-second = int(str(time)[17:19])
+# extracting time informattion and write it in python format
+time = f.attrs['OBSERVATION_START_UTC']
+start_time_obs = datetime.datetime.strptime( time, '%Y-%m-%dT%H:%M:%S.%f000Z' )
 
-t = datetime.datetime(year, month, day, hour, minute, second)
-start_time = t + datetime.timedelta( minutes = start_min )
-end_time = t + datetime.timedelta( minutes = end_min )
+start_time = start_time_obs + datetime.timedelta( minutes = start_min )
+end_time = start_time_obs + datetime.timedelta( minutes = end_min )
 print 'Start time of observation UT:', str(start_time.date()) + ' ' + str(start_time.time())
 
 #plotting dynamic spectrum for specified times
